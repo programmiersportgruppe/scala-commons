@@ -95,10 +95,10 @@ lazy val basics = project
     libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "test"
   )
 
-def coreDependency = core % "compile->compile;test->test"
+def basicsDependency = basics % "compile->compile;test->test"
 
 lazy val json = project
-  .dependsOn(coreDependency)
+  .dependsOn(basicsDependency)
   .settings(sharedSettings: _*)
   .settings(
     description := "What json4s isn't bringing to the table.",
