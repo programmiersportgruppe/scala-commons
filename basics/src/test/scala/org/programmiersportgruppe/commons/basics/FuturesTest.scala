@@ -6,38 +6,43 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 class FuturesTest extends FunSuite with DiagrammedAssertions {
-    import Futures._
-    import scala.concurrent.duration._
-    import ExecutionContext.Implicits.global
 
-    test("handleFailure-action should be triggered by failure") {
-        val futureResult: Future[String] = Future.failed(new RuntimeException("FAIL"))
+  import Futures._
+  import scala.concurrent.duration._
+  import ExecutionContext.Implicits.global
 
-        var collector: List[String] = List.empty
+  test("handleFailure-action should be triggered by failure") {
+    val futureResult: Future[String] = Future.failed(new RuntimeException("FAIL"))
 
-        val optionalFutureResult: Future[Option[String]] = futureResult
-            .handleFailure((ex) => {collector = collector :+ ex.getMessage})
-            .toOption
+    var collector: List[String] = List.empty
 
-        val optionalResult = Await.result(optionalFutureResult, 2.seconds)
+    val optionalFutureResult: Future[Option[String]] = futureResult
+      .handleFailure((ex) => {
+        collector = collector :+ ex.getMessage
+      })
+      .toOption
 
-        assert(optionalResult == None)
-        assert(collector == List("FAIL"))
-    }
+    val optionalResult = Await.result(optionalFutureResult, 2.seconds)
 
-    test("handleFailure-action should not be triggered in success case and successful value propagated") {
-        val futureResult: Future[String] = Future.successful("Successful result")
+    assert(optionalResult == None)
+    assert(collector == List("FAIL"))
+  }
 
-        var collector: List[String] = List.empty
+  test("handleFailure-action should not be triggered in success case and successful value propagated") {
+    val futureResult: Future[String] = Future.successful("Successful result")
 
-        val optionalFutureResult: Future[Option[String]] = futureResult
-            .handleFailure((ex) => {collector = collector :+ ex.getMessage})
-            .toOption
+    var collector: List[String] = List.empty
 
-        val optionalResult = Await.result(optionalFutureResult, 2.seconds)
+    val optionalFutureResult: Future[Option[String]] = futureResult
+      .handleFailure((ex) => {
+        collector = collector :+ ex.getMessage
+      })
+      .toOption
 
-        assert(collector == List())
-        assert(optionalResult == Some("Successful result"))
-    }
+    val optionalResult = Await.result(optionalFutureResult, 2.seconds)
+
+    assert(collector == List())
+    assert(optionalResult == Some("Successful result"))
+  }
 
 }

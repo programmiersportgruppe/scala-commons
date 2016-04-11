@@ -5,32 +5,37 @@ import org.scalatest.{DiagrammedAssertions, FunSuite}
 import scala.util.{Failure, Success, Try}
 
 class TriesTest extends FunSuite with DiagrammedAssertions {
-    import Tries._
 
-    test("onFailure-action should be triggered by failure") {
-        val potentialResult: Try[String] = Failure(new RuntimeException("FAIL"))
+  import Tries._
 
-        var collector: List[String] = List.empty
+  test("onFailure-action should be triggered by failure") {
+    val potentialResult: Try[String] = Failure(new RuntimeException("FAIL"))
 
-        val optionalResult: Option[String] = potentialResult
-            .onFailure((ex) => {collector = collector :+ ex.getMessage})
-            .toOption
+    var collector: List[String] = List.empty
 
-        assert(optionalResult == None)
-        assert(collector == List("FAIL"))
-    }
+    val optionalResult: Option[String] = potentialResult
+      .onFailure((ex) => {
+        collector = collector :+ ex.getMessage
+      })
+      .toOption
 
-    test("onFailure-action should not be triggered in success case and successful value propagated") {
-        val potentialResult: Try[String] = Success("Successful result")
+    assert(optionalResult == None)
+    assert(collector == List("FAIL"))
+  }
 
-        var errorCollector: List[String] = List.empty
+  test("onFailure-action should not be triggered in success case and successful value propagated") {
+    val potentialResult: Try[String] = Success("Successful result")
 
-        val optionalResult: Option[String] = potentialResult
-        .onFailure((ex) => {errorCollector = errorCollector :+ ex.getMessage})
-        .toOption
+    var errorCollector: List[String] = List.empty
 
-        assert(errorCollector == List())
-        assert(optionalResult == Some("Successful result"))
-    }
+    val optionalResult: Option[String] = potentialResult
+      .onFailure((ex) => {
+        errorCollector = errorCollector :+ ex.getMessage
+      })
+      .toOption
+
+    assert(errorCollector == List())
+    assert(optionalResult == Some("Successful result"))
+  }
 
 }
