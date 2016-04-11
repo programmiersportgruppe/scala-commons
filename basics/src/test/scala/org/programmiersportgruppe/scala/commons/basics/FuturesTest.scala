@@ -3,7 +3,6 @@ package org.programmiersportgruppe.scala.commons.basics
 import org.scalatest.{DiagrammedAssertions, FunSuite}
 
 import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
 
 class FuturesTest extends FunSuite with DiagrammedAssertions {
 
