@@ -3,7 +3,7 @@
 set -e
 set -u
 set -o pipefail
-
+set -x
 
 usage() {
     cat <<EOF
@@ -30,14 +30,13 @@ usage-error() {
     error "$1" "$(usage)" "" "Use -? or --help for help, or -- to separate arguments from options"
 }
 
-change=explicit
+change=none
 fail_on_binary_incompatibility=true
 ignore_unpushed_commits=false
 ignore_upstream_commits=false
 
 set-change() {
-    [ "$1" != "${change}" ] || return
-    [ "${change}" = explicit ] || usage-error "multiple version specifiers (got ${change} and now getting $*)"
+    [ "${change}" = none ] || usage-error "multiple version specifiers (got ${change} and now getting $*)"
     change="$1"
 }
 
@@ -59,7 +58,7 @@ done
 
 case $# in
     0) [ "${change}" != explicit ] || usage-error "missing version specifier";;
-    1) set-change explicit "$1"; version="$1";;
+    1) set-change explicit; version="$1";;
     *) usage-error "too many arguments";;
 esac
 
@@ -92,15 +91,13 @@ merge_base="$(git merge-base "${release_commit}" "${upstream_commit}")"
 
 previous_release_tag="$(git describe --tags --match="v*" --abbrev=0 2>/dev/null ||:)"
 previous_release_version="${previous_release_tag#v}"
-typeset -i major minor patch
-major="${previous_release_version%%.*}"
-patch="${previous_release_version##*.}"
-minor="${previous_release_version:$((${#major}+1)):$((${#previous_release_version}-${#major}-${#patch}-2))}"
-[ "v${major}.${minor}.${patch}" = "${previous_release_tag}" ] || error "previous release tag ${previous_release_tag} was reconstructed as v${major}.${minor}.${patch} after parsing"
 
-if [ "${change}" = explicit ]; then
-    error "explicit version releases aren't yet implemented; you might want to edit the release script to have it do the right thing"
-else
+if [ "${change}" != explicit ]; then
+    typeset -i major minor patch
+    major="${previous_release_version%%.*}"
+    patch="${previous_release_version##*.}"
+    minor="${previous_release_version:$((${#major}+1)):$((${#previous_release_version}-${#major}-${#patch}-2))}"
+    [ "v${major}.${minor}.${patch}" = "${previous_release_tag}" ] || error "previous release tag ${previous_release_tag} was reconstructed as v${major}.${minor}.${patch} after parsing"
     let "${change}+=1"
     version="${major}.${minor}.${patch}"
 fi
@@ -117,15 +114,23 @@ echo "Pruning target directories…"
 find . -name target -prune -exec rm -r {} \;
 
 echo "Building and publishing…"
-sbt \
-    "set previousVersion := Some(\"${previous_release_version}\")" \
-    "set version in Global := \"${version}\"" \
-    +mimaPreviousClassfiles \
-    +test \
-    "set failOnBinaryIncompatibility := ${fail_on_binary_incompatibility}" \
-    +mimaReportBinaryIssues \
-    +publishSigned \
-    ;
+if [ -z "${previous_release_tag}" ]; then
+    sbt \
+        "set version in Global := \"${version}\"" \
+        +test \
+        +publishSigned \
+        ;
+else
+    sbt \
+        "set previousVersion := Some(\"${previous_release_version}\")" \
+        "set version in Global := \"${version}\"" \
+        +mimaPreviousClassfiles \
+        +test \
+        "set failOnBinaryIncompatibility := ${fail_on_binary_incompatibility}" \
+        +mimaReportBinaryIssues \
+        +publishSigned \
+        ;
+fi
 
 dirty=$(git status --porcelain)
 [ -z "${dirty}" ] || error "building and releasing made the repository dirty! Please fix this tragedy and then tag the release and update the readme." "${dirty}"
