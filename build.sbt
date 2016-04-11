@@ -31,7 +31,7 @@ val sharedSettings = mimaDefaultSettings ++ Seq[Def.Setting[_]](
     connection  = "scm:git:git@github.com:programmiersportgruppe/scala-commons.git"
   )),
   licenses := Seq("MIT Licence" -> url("http://opensource.org/licenses/MIT")),
-  organization := "org.programmiersportgruppe.scala-commons",
+  organization := "org.programmiersportgruppe.scala.commons",
   conflictManager := ConflictManager.strict,
   dependencyOverrides += "org.scala-lang" % "scala-library" % scalaVersion.value,
   dependencyOverrides += "org.scala-lang.modules" %% "scala-xml" % "1.0.5",

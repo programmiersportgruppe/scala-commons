@@ -1,4 +1,4 @@
-package org.programmiersportgruppe.commons.basics
+package org.programmiersportgruppe.scala.commons.basics
 
 import org.scalatest.{DiagrammedAssertions, FunSuite}
 
