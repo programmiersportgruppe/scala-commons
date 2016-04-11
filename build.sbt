@@ -1,7 +1,7 @@
 import com.typesafe.tools.mima.plugin.MimaKeys
 import sbt.impl.GroupArtifactID
 
-crossScalaVersions in Global := Seq("2.10.6", "2.11.7")
+crossScalaVersions in Global := Seq("2.10.6", "2.11.8")
 
 scalaVersion in Global := crossScalaVersions.value.head
 
@@ -34,6 +34,7 @@ val sharedSettings = mimaDefaultSettings ++ Seq[Def.Setting[_]](
   organization := "org.programmiersportgruppe.scala-commons",
   conflictManager := ConflictManager.strict,
   dependencyOverrides += "org.scala-lang" % "scala-library" % scalaVersion.value,
+  dependencyOverrides += "org.scala-lang.modules" %% "scala-xml" % "1.0.5",
   scalacOptions := Seq(
     "-deprecation",
     "-encoding", "UTF-8",
