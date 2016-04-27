@@ -97,11 +97,3 @@ lazy val basics = project
   )
 
 def basicsDependency = basics % "compile->compile;test->test"
-
-lazy val json = project
-  .dependsOn(basicsDependency)
-  .settings(sharedSettings: _*)
-  .settings(
-    description := "What json4s isn't bringing to the table.",
-    libraryDependencies += "org.json4s" %% "json4s-native" % "3.3.0"
-  )
