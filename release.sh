@@ -57,7 +57,7 @@ while (( $# > 0 )); do
 done
 
 case $# in
-    0) [ "${change}" != explicit ] || usage-error "missing version specifier";;
+    0) [ "${change}" != none ] || usage-error "missing version specifier";;
     1) set-change explicit; version="$1";;
     *) usage-error "too many arguments";;
 esac
