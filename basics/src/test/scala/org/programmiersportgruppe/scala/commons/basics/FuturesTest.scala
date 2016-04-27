@@ -52,10 +52,10 @@ class FuturesTest extends UnitTest {
     assert(result.cause == Some(exception))
   }
 
-  test("flatMapTry wraps successful future result in Success") {
+  test("transformWith wraps successful future result in Success") {
     val future =
       Future.successful(42)
-        .flatMapTry {
+        .transformWith {
           case Success(42) => Future.successful("Foo")
           case _ => Future.successful("Boo")
         }
@@ -65,11 +65,11 @@ class FuturesTest extends UnitTest {
     assert(result === "Foo")
   }
 
-  test("flatMapTry replaces failed future with successful future containing Failed(_)") {
+  test("transformWith replaces failed future with successful future containing Failed(_)") {
     val exception = new RuntimeException("Whoops!")
     val future =
       Future.failed[Int](exception)
-        .flatMapTry {
+        .transformWith {
           case Failure(`exception`) => Future.successful("Bar")
           case _ => Future.successful("Boo")
         }
@@ -79,11 +79,11 @@ class FuturesTest extends UnitTest {
     assert(result === "Bar")
   }
 
-  test("flatMapTry fails the future with a returned failed future") {
+  test("transformWith fails the future with a returned failed future") {
     val exception = new RuntimeException("Whoops!")
     val future =
       Future.successful(42)
-        .flatMapTry(_ => Future.failed(exception))
+        .transformWith(_ => Future.failed(exception))
 
     val result = intercept[TestFailedException] {
       future.futureValue
@@ -92,11 +92,11 @@ class FuturesTest extends UnitTest {
     assert(result.cause == Some(exception))
   }
 
-  test("flatMapTry fails the future with exceptions thrown during mapping") {
+  test("transformWith fails the future with exceptions thrown during mapping") {
     val exception = new RuntimeException("Whoops!")
     val future =
       Future.successful(42)
-        .flatMapTry(_ => throw exception)
+        .transformWith(_ => throw exception)
 
     val result = intercept[TestFailedException] {
       future.futureValue

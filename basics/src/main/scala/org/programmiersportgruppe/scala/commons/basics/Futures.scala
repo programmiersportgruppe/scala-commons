@@ -19,13 +19,15 @@ object Futures {
       p.future
     }
 
-    /** Map over the inner `Try[A]` completion value of the future,
+    /** Flat-map over the inner `Try[A]` completion value of the future,
       * rather than the `A` success value like the normal [[scala.concurrent.Future.flatMap]] method.
+      *
+      * Note that this method is provided by [[scala.concurrent.Future]] starting in Scala 2.12.
       */
-    def flatMapTry[B](fn: Try[A] => Future[B])(implicit executor: ExecutionContext): Future[B] = {
+    def transformWith[B](f: Try[A] => Future[B])(implicit executor: ExecutionContext): Future[B] = {
       val p = Promise[B]()
       self.onComplete(result => p.completeWith(
-        try fn(result)
+        try f(result)
         catch { case NonFatal(e) => Future.failed(e) }
       ))
       p.future
