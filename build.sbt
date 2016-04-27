@@ -1,7 +1,7 @@
 import com.typesafe.tools.mima.plugin.MimaKeys
 import sbt.impl.GroupArtifactID
 
-crossScalaVersions in Global := Seq("2.10.6", "2.11.8")
+crossScalaVersions in Global := Seq("2.10.6", "2.11.8", "2.12.0-M4")
 
 scalaVersion in Global := crossScalaVersions.value.head
 
@@ -42,8 +42,6 @@ val sharedSettings = mimaDefaultSettings ++ Seq[Def.Setting[_]](
     "-unchecked",
     "-Xlint",
     "-Xfatal-warnings",
-    "-Yclosure-elim",
-    "-Ydead-code",
     "-Yno-adapted-args",
     "-Ywarn-adapted-args",
     "-Ywarn-dead-code",
@@ -51,16 +49,26 @@ val sharedSettings = mimaDefaultSettings ++ Seq[Def.Setting[_]](
     "-Ywarn-nullary-override",
     "-Ywarn-nullary-unit",
     "-Ywarn-numeric-widen",
-//    "-Ywarn-value-discard", // possibly more trouble than it's worth
-    "-Xfuture") ++ (
-    if (scalaBinaryVersion.value == "2.10") Nil
-    else Seq(
+    "-Ywarn-value-discard", // possibly more trouble than it's worth
+    "-Xfuture"
+  ) ++ (scalaBinaryVersion.value match {
+    case "2.10" => Seq(
+      "-Yclosure-elim",
+      "-Ydead-code")
+    case "2.11" => Seq(
       "-explaintypes",
+      "-Yclosure-elim",
+      "-Ydead-code",
       "-Yconst-opt",
       "-Ywarn-infer-any",
       "-Ywarn-unused",
       "-Ywarn-unused-import")
-    ),
+    case "2.12.0-M4" => Seq(
+      "-explaintypes",
+      "-Ywarn-infer-any",
+      "-Ywarn-unused",
+      "-Ywarn-unused-import")
+  }),
   pomExtra := {
     <developers>
       <developer>

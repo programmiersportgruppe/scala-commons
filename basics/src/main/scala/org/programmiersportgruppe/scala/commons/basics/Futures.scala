@@ -2,7 +2,7 @@ package org.programmiersportgruppe.scala.commons
 package basics
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
-import scala.util.Try
+import scala.util.{Failure, Try}
 import scala.util.control.NonFatal
 
 
@@ -50,7 +50,10 @@ object Futures {
       * meaning that it will be completed before the action has completed.
       */
     def handleFailure(action: Throwable => Unit)(implicit executor: ExecutionContext): Future[A] = {
-      self.onFailure { case t => action(t) }
+      self.onComplete {
+        case Failure(t) => action(t)
+        case _          =>
+      }
       self
     }
 
