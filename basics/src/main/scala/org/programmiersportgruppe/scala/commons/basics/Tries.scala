@@ -1,11 +1,12 @@
-package org.programmiersportgruppe.scala.commons.basics
+package org.programmiersportgruppe.scala.commons
+package basics
 
 import scala.util.{Failure, Try}
 
 object Tries {
 
   /** Extension methods for Try */
-  implicit class AugmentedTry[T](val self: Try[T]) extends AnyVal {
+  implicit final class AugmentedTry[T](val self: Try[T]) extends AnyVal {
 
     /** Execute an action if the Try is a Failure.
       *

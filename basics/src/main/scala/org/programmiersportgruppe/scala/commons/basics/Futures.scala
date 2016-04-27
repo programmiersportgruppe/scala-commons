@@ -1,4 +1,5 @@
-package org.programmiersportgruppe.scala.commons.basics
+package org.programmiersportgruppe.scala.commons
+package basics
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.Try
@@ -7,12 +8,12 @@ import scala.util.control.NonFatal
 
 object Futures {
 
-  implicit class AugmentedFuture[A](val self: Future[A]) extends AnyVal {
+  implicit final class AugmentedFuture[A](val self: Future[A]) extends AnyVal {
 
     /** Map over the inner `Try[A]` completion value of the future,
       * rather than the `A` success value like the normal [[scala.concurrent.Future.map]] method.
       */
-    final def mapTry[B](f: Try[A] => B)(implicit executor: ExecutionContext): Future[B] = {
+    def mapTry[B](f: Try[A] => B)(implicit executor: ExecutionContext): Future[B] = {
       val p = Promise[B]()
       self.onComplete(result => p.complete(Try(f(result))))
       p.future
@@ -21,7 +22,7 @@ object Futures {
     /** Map over the inner `Try[A]` completion value of the future,
       * rather than the `A` success value like the normal [[scala.concurrent.Future.flatMap]] method.
       */
-    final def flatMapTry[B](fn: Try[A] => Future[B])(implicit executor: ExecutionContext): Future[B] = {
+    def flatMapTry[B](fn: Try[A] => Future[B])(implicit executor: ExecutionContext): Future[B] = {
       val p = Promise[B]()
       self.onComplete(result => p.completeWith(
         try fn(result)
