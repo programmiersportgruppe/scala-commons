@@ -1,16 +1,16 @@
-package org.programmiersportgruppe.scala.commons.basics
+package org.programmiersportgruppe.scala.commons
+package basics
 
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.exceptions.TestFailedException
-import org.scalatest.{DiagrammedAssertions, FunSuite}
 
+import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-class FuturesTest extends FunSuite with DiagrammedAssertions with ScalaFutures {
+class FuturesTest extends UnitTest {
 
   import Futures._
-  import scala.concurrent.duration._
+
   import ExecutionContext.Implicits.global
 
   test("mapTry wraps successful future result in Success") {

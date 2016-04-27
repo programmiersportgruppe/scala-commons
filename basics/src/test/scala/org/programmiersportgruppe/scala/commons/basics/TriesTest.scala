@@ -1,10 +1,9 @@
-package org.programmiersportgruppe.scala.commons.basics
-
-import org.scalatest.{DiagrammedAssertions, FunSuite}
+package org.programmiersportgruppe.scala.commons
+package basics
 
 import scala.util.{Failure, Success, Try}
 
-class TriesTest extends FunSuite with DiagrammedAssertions {
+class TriesTest extends UnitTest {
 
   import Tries._
 
