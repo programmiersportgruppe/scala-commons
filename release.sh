@@ -13,6 +13,7 @@ usage: $0 [options] [--major | --minor | --patch | [--] <version>]
         --allow-binary-incompatibility
         --ignore-unpushed-commits
         --ignore-upstream-commits
+        --mima-previous-version <sbt-scala-expression>
 
 EOF
 }
@@ -34,6 +35,7 @@ change=none
 fail_on_binary_incompatibility=true
 ignore_unpushed_commits=false
 ignore_upstream_commits=false
+mima_previous_version=
 
 set-change() {
     [ "${change}" = none ] || usage-error "multiple version specifiers (got ${change} and now getting $*)"
@@ -46,6 +48,7 @@ while (( $# > 0 )); do
         --ignore-unpushed-commits) ignore_unpushed_commits=true;;
         --ignore-upstream-commits) ignore_upstream_commits=true;;
         --major) set-change major;;
+        --mima-previous-version) mima_previous_version="$2"; shift;;
         --minor) set-change minor;;
         --patch) set-change patch;;
         -'?' | --help) usage; exit 0;;
@@ -114,23 +117,24 @@ echo "Pruning target directories…"
 find . -name target -prune -exec rm -r {} \;
 
 echo "Building and publishing…"
-if [ -z "${previous_release_tag}" ]; then
-    sbt \
-        "set version in Global := \"${version}\"" \
-        +test \
-        +publishSigned \
-        ;
-else
-    sbt \
-        "set previousVersion := Some(\"${previous_release_version}\")" \
-        "set version in Global := \"${version}\"" \
-        +mimaPreviousClassfiles \
-        +test \
-        "set failOnBinaryIncompatibility := ${fail_on_binary_incompatibility}" \
-        +mimaReportBinaryIssues \
-        +publishSigned \
-        ;
+
+if [ -z "${mima_previous_version}" ]; then
+    if [ -z "${previous_release_tag}" ]; then
+        mima_previous_version="None"
+    else
+        mima_previous_version="Some(\"${previous_release_version}\")"
+    fi
 fi
+
+sbt \
+    "set previousVersion := { ${mima_previous_version} }" \
+    "set version in Global := \"${version}\"" \
+    +mimaPreviousClassfiles \
+    +test \
+    "set failOnBinaryIncompatibility := ${fail_on_binary_incompatibility}" \
+    +mimaReportBinaryIssues \
+    +publishSigned \
+    ;
 
 dirty=$(git status --porcelain)
 [ -z "${dirty}" ] || error "building and releasing made the repository dirty! Please fix this tragedy and then tag the release and update the readme." "${dirty}"
